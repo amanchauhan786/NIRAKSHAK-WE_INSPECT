@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LiDAR Disaster Management System</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.3/socket.io.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/socket.io-client/dist/socket.io.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        :root {
+            --primary-color: #1a365d;
+            --secondary-color: #2b6cb0;
+            --accent-color: #3182ce;
+            --background-color: #f8fafc;
+            --text-color: #1a202c;
+            --border-color: #e2e8f0;
+            --success-color: #48bb78;
+            --warning-color: #ecc94b;
+            --danger-color: #f56565;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+        }
+
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            line-height: 1.6;
+        }
+
+        header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 1rem 0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 2rem;
+        }
+
+        header .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .logo img {
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .logo h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        nav ul {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            transition: all 0.3s;
+        }
+
+        nav a:hover {
+            background-color: rgba(255,255,255,0.15);
+            transform: translateY(-2px);
+        }
+
+        .hero-section {
+            background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), url('/api/placeholder/1920/600') center/cover;
+            color: white;
+            padding: 8rem 0;
+            text-align: center;
+            position: relative;
+        }
+
+        .hero-content {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .hero-content h2 {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            line-height: 1.2;
+        }
+
+        .hero-content p {
+            font-size: 1.25rem;
+            margin-bottom: 2.5rem;
+            opacity: 0.9;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 1rem 2.5rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .primary-button {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .primary-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(49,130,206,0.3);
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding-top: 4rem;
+        }
+
+        .section-title h2 {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .section-title p {
+            color: var(--text-color);
+            opacity: 0.8;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 2.5rem;
+            padding: 6rem 0;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 2.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .feature-card img {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 1.5rem;
+            border-radius: 12px;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+        }
+
+        .feature-card h3 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            font-size: 1.5rem;
+        }
+
+        .dashboard-section {
+            background: white;
+            padding: 3rem;
+            border-radius: 16px;
+            margin: 4rem 0;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
+            gap: 2.5rem;
+            margin-top: 2.5rem;
+        }
+
+        .chart-container {
+            background: var(--background-color);
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            min-height: 300px;
+        }
+
+        .metrics-panel {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2rem;
+            margin-top: 2.5rem;
+        }
+
+        .metric-card {
+            background: var(--background-color);
+            padding: 2rem;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .metric-card h4 {
+            color: var(--text-color);
+            margin-bottom: 0.75rem;
+            font-size: 1.1rem;
+        }
+
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .case-studies {
+            padding: 6rem 0;
+        }
+
+        .case-study-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2.5rem;
+            margin-top: 3rem;
+        }
+
+        .case-study-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            transition: all 0.3s;
+        }
+
+        .case-study-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+        }
+
+        .case-study-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .case-study-content {
+            padding: 2rem;
+        }
+
+        .case-study-content h3 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .team-section {
+            padding: 6rem 0;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+        }
+
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 2.5rem;
+            margin-top: 3rem;
+        }
+
+        .team-member {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2rem;
+            border-radius: 12px;
+        }
+
+        .team-member img {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            margin-bottom: 1.5rem;
+            border: 4px solid white;
+        }
+
+        footer {
+            background: var(--primary-color);
+            color: white;
+            padding: 4rem 0 2rem;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 3rem;
+        }
+
+        .footer-section h3 {
+            margin-bottom: 1.5rem;
+            font-size: 1.2rem;
+        }
+
+        .footer-section ul {
+            list-style: none;
+        }
+
+        .footer-section ul li {
+            margin-bottom: 0.75rem;
+        }
+
+        .footer-section a {
+            color: white;
+            text-decoration: none;
+            opacity: 0.8;
+            transition: opacity 0.3s;
+        }
+
+        .footer-section a:hover {
+            opacity: 1;
+        }
+
+        .copyright {
+            text-align: center;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        @media (max-width: 768px) {
+            header .container {
+                flex-direction: column;
+                gap: 1.5rem;
+                padding: 1rem;
+            }
+
+            nav ul {
+                flex-direction: column;
+                text-align: center;
+                gap: 0.75rem;
+            }
+
+            .hero-content h2 {
+                font-size: 2.25rem;
+            }
+
+            .hero-content p {
+                font-size: 1.1rem;
+            }
+
+            .charts-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="logo">
+<!--                <img src="/api/placeholder/48/48" alt="LiDAR Logo">-->
+                <h1>NIRAKSHIT</h1>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="#home">Home</a></li>
+                    <li><a href="#features">Features</a></li>
+                    <li><a href="#dashboard">Dashboard</a></li>
+                    <li><a href="#case-studies">Case Studies</a></li>
+                    <li><a href="#team">Our Team</a></li>
+                    <li><a href="#contact">Contact</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section id="home" class="hero-section">
+        <div class="container hero-content">
+            <h2>Advanced LiDAR Technology for Disaster Management</h2>
+            <p>Leverage cutting-edge LiDAR technology for precise mapping, monitoring, and analysis of critical infrastructure and disaster-prone areas. Our system provides real-time insights for better decision-making.</p>
+            <a href="#dashboard" class="button primary-button">View Live Dashboard</a>
+        </div>
+    </section>
+
+    <main class="container">
+        <section id="features" class="features-grid">
+            <div class="feature-card">
+<!--                <img src="pc1.jpg" alt="Real-time Monitoring Icon">-->
+                <h3>Real-Time Monitoring</h3>
+                <p>Continuous monitoring of critical infrastructure with millimeter-level precision using advanced LiDAR sensors. Get instant alerts and notifications for any anomalies.</p>
+            </div>
+            <div class="feature-card">
+<!--                <img src="https://www.google.com/url?sa=i&url=https%3A%2F%2Fgetthematic.com%2Finsights%2Fthematic-analysis%2F&psig=AOvVaw3oBpoOPTp9PMMA9SjFO7s_&ust=1738791657179000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCNjt7e39qosDFQAAAAAdAAAAABAE" alt="Predictive Analytics Icon">-->
+                <h3>Predictive Analytics</h3>
+                <p>AI-powered analysis to predict potential structural failures and natural disasters before they occur. Our machine learning models provide accurate risk assessments.</p>
+            </div>
+            <div class="feature-card">
+<!--                <img src="/api/placeholder/80/80" alt="Emergency Response Icon">-->
+                <h3>Emergency Response</h3>
+                <p>Rapid deployment capabilities for immediate assessment and response in disaster scenarios. Coordinated response with emergency services and stakeholders.</p>
+            </div>
+        </section>
+
+        <section id="dashboard" class="dashboard-section">
+        <div class="section-title">
+            <h2>Live Monitoring Dashboard</h2>
+            <p>Real-time visualization of LiDAR data and analytics</p>
+        </div>
+
+
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real-Time LiDAR Data Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .dashboard {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .chart-container {
+            background-color: #fff;
+            padding: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .chart-container:hover {
+            transform: scale(1.02);
+        }
+        canvas {
+            width: 100% !important;
+            height: 300px !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="dashboard">
+        <!-- Scatter Plot (X vs Y) -->
+        <div class="chart-container">
+            <h3>Scatter Plot (X vs Y)</h3>
+            <canvas id="scatterChart"></canvas>
+        </div>
+
+        <!-- Distance vs Time -->
+        <div class="chart-container">
+            <h3>Distance vs Time</h3>
+            <canvas id="distanceChart"></canvas>
+        </div>
+
+        <!-- Angle vs Time -->
+        <div class="chart-container">
+            <h3>Angle vs Time</h3>
+            <canvas id="angleChart"></canvas>
+        </div>
+
+        <!-- Polar Plot (Distance vs Angle) -->
+        <div class="chart-container">
+            <h3>Polar Plot (Distance vs Angle)</h3>
+            <canvas id="polarChart"></canvas>
+        </div>
+    </div>
+
+    <script>
+        // Register the zoom plugin
+        Chart.register(ChartZoom);
+
+        // Initialize all charts
+        const scatterCtx = document.getElementById('scatterChart').getContext('2d');
+        const distanceCtx = document.getElementById('distanceChart').getContext('2d');
+        const angleCtx = document.getElementById('angleChart').getContext('2d');
+        const polarCtx = document.getElementById('polarChart').getContext('2d');
+
+        const scatterChart = new Chart(scatterCtx, {
+            type: 'scatter',
+            data: {
+                datasets: [{
+                    label: 'LiDAR Data (X vs Y)',
+                    data: [],
+                    backgroundColor: (ctx) => {
+                        const distance = ctx.raw?.distance || 0;
+                        return getColorForDistance(distance);
+                    },
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1,
+                    pointRadius: 5,
+                    pointHoverRadius: 7
+                }]
+            },
+            options: {
+                scales: {
+                    x: {
+                        type: 'linear',
+                        position: 'bottom',
+                        title: {
+                            display: true,
+                            text: 'X (mm)'
+                        },
+                        grid: {
+                            color: 'rgba(200, 200, 200, 0.2)'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Y (mm)'
+                        },
+                        grid: {
+                            color: 'rgba(200, 200, 200, 0.2)'
+                        }
+                    }
+                },
+                plugins: {
+                    zoom: {
+                        zoom: {
+                            wheel: {
+                                enabled: true
+                            },
+                            pinch: {
+                                enabled: true
+                            },
+                            mode: 'xy'
+                        },
+                        pan: {
+                            enabled: true,
+                            mode: 'xy'
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: (context) => {
+                                const data = context.raw;
+                                return `X: ${data.x.toFixed(2)} mm, Y: ${data.y.toFixed(2)} mm, Distance: ${data.distance.toFixed(2)} mm`;
+                            }
+                        }
+                    }
+                },
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+
+        const distanceChart = new Chart(distanceCtx, {
+            type: 'line',
+            data: {
+                labels: [], // Time labels
+                datasets: [{
+                    label: 'Distance (mm)',
+                    data: [],
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    borderWidth: 1,
+                    fill: true
+                }]
+            },
+            options: {
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Time'
+                        },
+                        grid: {
+                            color: 'rgba(200, 200, 200, 0.2)'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Distance (mm)'
+                        },
+                        grid: {
+                            color: 'rgba(200, 200, 200, 0.2)'
+                        }
+                    }
+                },
+                plugins: {
+                    zoom: {
+                        zoom: {
+                            wheel: {
+                                enabled: true
+                            },
+                            pinch: {
+                                enabled: true
+                            },
+                            mode: 'xy'
+                        },
+                        pan: {
+                            enabled: true,
+                            mode: 'xy'
+                        }
+                    }
+                },
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+
+        const angleChart = new Chart(angleCtx, {
+            type: 'line',
+            data: {
+                labels: [], // Time labels
+                datasets: [{
+                    label: 'Angle (°)',
+                    data: [],
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1,
+                    fill: true
+                }]
+            },
+            options: {
+                scales: {
+                    x: {
+                        title: {
+                            display: true,
+                            text: 'Time'
+                        },
+                        grid: {
+                            color: 'rgba(200, 200, 200, 0.2)'
+                        }
+                    },
+                    y: {
+                        title: {
+                            display: true,
+                            text: 'Angle (°)'
+                        },
+                        grid: {
+                            color: 'rgba(200, 200, 200, 0.2)'
+                        }
+                    }
+                },
+                plugins: {
+                    zoom: {
+                        zoom: {
+                            wheel: {
+                                enabled: true
+                            },
+                            pinch: {
+                                enabled: true
+                            },
+                            mode: 'xy'
+                        },
+                        pan: {
+                            enabled: true,
+                            mode: 'xy'
+                        }
+                    }
+                },
+                responsive: true,
+                maintainAspectRatio: false
+            }
+        });
+
+        const polarChart = new Chart(polarCtx, {
+            type: 'polarArea',
+            data: {
+                labels: [], // Angle labels
+                datasets: [{
+                    label: 'Distance (mm)',
+                    data: [],
+                    backgroundColor: (ctx) => {
+                        const angle = ctx.dataIndex;
+                        return getColorForAngle(angle);
+                    },
+                    borderColor: 'rgba(153, 102, 255, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    r: {
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(200, 200, 200, 0.2)'
+                        }
+                    }
+                },
+                plugins: {
+                    tooltip: {
+                        callbacks: {
+                            label: (context) => {
+                                const angle = context.label;
+                                const distance = context.raw;
+                                return `Angle: ${angle}, Distance: ${distance.toFixed(2)} mm`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Function to generate color based on distance
+        function getColorForDistance(distance) {
+            const maxDistance = 5000; // Adjust based on your LiDAR range
+            const hue = (1 - Math.min(distance / maxDistance, 1)) * 120; // Green to Red
+            return `hsl(${hue}, 100%, 50%)`;
+        }
+
+        // Function to generate color based on angle
+        function getColorForAngle(angle) {
+            const hue = (angle % 360); // Full color spectrum
+            return `hsl(${hue}, 100%, 50%)`;
+        }
+
+        // Function to fetch data from the Flask server
+        async function fetchData() {
+            try {
+                const response = await fetch('/get_lidar_data');
+                const data = await response.json();
+
+                // Function to limit data to the last N points
+                const limitData = (array, limit) => array.slice(-limit);
+
+                // Update Scatter Plot (limit to 40 values)
+                scatterChart.data.datasets[0].data = data.x_vals.map((x, index) => ({
+                    x: x,
+                    y: data.y_vals[index],
+                    distance: data.distances[index]
+                }));
+                scatterChart.data.datasets[0].data = limitData(scatterChart.data.datasets[0].data, 40); // Limit to last 40 points
+                scatterChart.update();
+
+                // Update Distance vs Time (limit to 20 values)
+                const timestamps = Array.from({ length: data.distances.length }, (_, i) => i + 1); // Simulated time
+                distanceChart.data.labels = limitData(timestamps, 20); // Limit to last 20 points
+                distanceChart.data.datasets[0].data = limitData(data.distances, 20); // Limit to last 20 points
+                distanceChart.update();
+
+                // Update Angle vs Time (limit to 20 values)
+                angleChart.data.labels = limitData(timestamps, 20); // Limit to last 20 points
+                angleChart.data.datasets[0].data = limitData(data.angles, 20); // Limit to last 20 points
+                angleChart.update();
+
+                // Update Polar Plot (limit to 20 values)
+                polarChart.data.labels = limitData(data.angles.map(angle => `${angle.toFixed(2)}°`), 20); // Limit to last 20 points
+                polarChart.data.datasets[0].data = limitData(data.distances, 20); // Limit to last 20 points
+                polarChart.update();
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        }
+
+        // Fetch data every 300ms
+        setInterval(fetchData, 300);
+    </script>
+</body>
+
+
+    <script src="script.js"></script>
+
+        <section id="case-studies" class="case-studies">
+            <div class="section-title">
+                <h2>Success Stories</h2>
+                <p>Real-world applications of our LiDAR technology in disaster management</p>
+            </div>
+            <div class="case-study-grid">
+                <div class="case-study-card">
+<!--                    <img src="/api/placeholder/400/200" alt="Flood Monitoring" class="case-study-image">-->
+                    <div class="case-study-content">
+                        <h3>Flood Risk Monitoring</h3>
+                        <p>Successfully implemented real-time flood monitoring system across 50km of coastline, providing early warnings and saving countless lives.</p>
+                    </div>
+                </div>
+                <div class="case-study-card">
+<!--                    <img src="/api/placeholder/400/200" alt="Landslide Prevention" class="case-study-image">-->
+                    <div class="case-study-content">
+                        <h3>Landslide Prevention</h3>
+                        <p>Detected early signs of ground movement in mountainous regions, enabling preventive measures that protected local communities.</p>
+                    </div>
+                </div>
+                <div class="case-study-card">
+<!--                    <img src="/api/placeholder/400/200" alt="Infrastructure Monitoring" class="case-study-image">-->
+                    <div class="case-study-content">
+                        <h3>Bridge Safety Analysis</h3>
+                        <p>Continuous monitoring of critical bridge infrastructure led to early detection of structural weaknesses, preventing potential disasters.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="team" class="team-section">
+            <div class="container">
+                <div class="section-title">
+                    <h2>Our Expert Team</h2>
+                    <p>Meet the professionals behind our innovative LiDAR solutions</p>
+                </div>
+                <div class="team-grid">
+                    <div class="team-member">
+                        <h3>Aman Chauhan</h3>
+                        <p>Data Analyst</p>
+                        <p>As a Data Analyst specializing in drone automation and LiDAR analysis, I leverage high-resolution spatial data to derive insights for agriculture, environmental monitoring, infrastructure assessment, and disaster management. </p>
+                    </div>
+                    <div class="team-member">
+
+                        <h3>Aniket Singh</h3>
+                        <p>Embedded System Engineer</p>
+                        <p>As an Embedded Systems Engineer specializing in signal processing and PCB design, I develop and optimize hardware for drone-based LiDAR applications.</p>
+                    </div>
+                    <div class="team-member">
+                        <h3>Robin Philip</h3>
+                        <p>Embedded System Engineer</p>
+                        <p>As an Embedded Systems Engineer specializing in PCB design and signal processing, I design and optimize hardware for drone-based LiDAR systems, ensuring efficient data acquisition and seamless sensor integration.</p>
+                    </div>
+                    <div class="team-member">
+                        <h3>Tanmay Mishra</h3>
+                        <p>Senior System Engineer</p>
+                        <p>As a Senior Software Engineer, I specialize in ROS 2, developing robust robotic applications, optimizing real-time data processing, and integrating advanced automation technologies for seamless drone.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <style>
+        /* General Styles */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+
+        .contact-section {
+            padding: 60px 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .section-title h2 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            color: #2c3e50;
+        }
+
+        .section-title p {
+            font-size: 1.1rem;
+            color: #7f8c8d;
+            margin-bottom: 40px;
+        }
+
+        .contact-grid {
+            display: flex;
+            justify-content: center;
+        }
+
+        .contact-form {
+            background: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+            color: #333;
+            background-color: #f9f9f9;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 150px;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 12px 30px;
+            font-size: 1rem;
+            color: #fff;
+            background-color: #3498db;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .button:hover {
+            background-color: #2980b9;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .contact-section {
+                padding: 40px 15px;
+            }
+
+            .section-title h2 {
+                font-size: 2rem;
+            }
+
+            .section-title p {
+                font-size: 1rem;
+            }
+
+            .contact-form {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <section id="contact" class="contact-section">
+        <div class="section-title">
+            <h2>Get in Touch</h2>
+            <p>Contact us for demos, partnerships, or emergency response coordination</p>
+        </div>
+        <div class="contact-grid">
+            <div class="contact-form">
+                <form id="contactForm">
+                    <div class="form-group">
+                        <input type="text" placeholder="Your Name" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="email" placeholder="Your Email" required>
+                    </div>
+                    <div class="form-group">
+                        <select required>
+                            <option value="">Select Inquiry Type</option>
+                            <option value="demo">Request Demo</option>
+                            <option value="partnership">Partnership</option>
+                            <option value="emergency">Emergency Response</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <textarea placeholder="Your Message" rows="5" required></textarea>
+                    </div>
+                    <button type="submit" class="button primary-button">Send Message</button>
+                </form>
+            </div>
+        </div>
+    </section>
+</body>
+    </main>
+
+    <footer>
+        <div class="container footer-content">
+            <div class="footer-section">
+                <h3>Quick Links</h3>
+                <ul>
+                    <li><a href="#home">Home</a></li>
+                    <li><a href="#features">Features</a></li>
+                    <li><a href="#dashboard">Dashboard</a></li>
+                    <li><a href="#case-studies">Case Studies</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Contact Us</h3>
+                <ul>
+                    <li>Email: info@lidar-management.com</li>
+                    <li>Phone: (555) 123-4567</li>
+                    <li>Address: 123 Tech Street, Innovation City</li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Resources</h3>
+                <ul>
+                    <li><a href="#documentation">Documentation</a></li>
+                    <li><a href="#api">API Access</a></li>
+                    <li><a href="#support">Technical Support</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h3>Follow Us</h3>
+                <ul>
+                    <li><a href="#linkedin">LinkedIn</a></li>
+                    <li><a href="#twitter">Twitter</a></li>
+                    <li><a href="#github">GitHub</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="copyright">
+            <p>&copy; 2025 LiDAR Disaster Management. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Smooth scrolling for navigation links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+    </script>
+</body>
+</html>
