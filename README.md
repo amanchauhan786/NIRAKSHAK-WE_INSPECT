@@ -1,5 +1,3 @@
-Of course. Here is the updated README file, with a more prominent mention of the main document that contains all project links and details, as requested.
-
 # NIRAKSHAK - Autonomous Mine Inspection Robot
 
 > **Note**
@@ -57,3 +55,11 @@ This project was brought to life by the dedicated members of **Team Nirakshit**.
 **Mentor:** Dr. Tanmaya Kumar Das
 
 This project was recognized for its innovation, winning **2nd Place** at the **Reboot Hackathon, Yantra Week, VIT Vellore**.
+TEAM NIRAKSHIT
+
+Links:-
+
+**https://github.com/cropskyofficial/crack_detection_project
+https://github.com/amanchauhan786/NIRAKSHAK-WE_INSPECT
+https://www.canva.com/design/DAGeIDk4jzI/HpCH4oF5jg2DbV_XL6ypbg/edit?utm_content=DAGeIDk4jzI&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton **
+
